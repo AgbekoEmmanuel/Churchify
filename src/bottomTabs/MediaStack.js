@@ -33,9 +33,9 @@ export default function MediaStack() {
       <Stack.Screen name="LiveStreams" component={LiveStreamsScreen} options={{ title: 'Live Streams' }} />
       <Stack.Screen name="Gallery" component={GalleryScreen} options={{ title: 'Gallery' }} />
       <Stack.Screen name="BookDetails" component={BookDetailsScreen} />
-<Stack.Screen name="Cart" component={CartScreen} />
-<Stack.Screen name="Checkout" component={CheckoutScreen} />
-<Stack.Screen name="BooksList" component={BooksListScreen} />
+      <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
+      <Stack.Screen name="BooksList" component={BooksListScreen} />
     </Stack.Navigator>
   );
 }

@@ -1,28 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../theme/colors';
 
 const SECTIONS = [
-  { id: 'profile', label: 'Profile', icon: 'person-circle-outline' },
-  { id: 'check-in', label: 'Check-In', icon: 'location-outline' },
-  { id: 'votd', label: 'Verse of the Day', icon: 'sparkles-outline' },
-  { id: 'videos', label: 'Videos', icon: 'videocam-outline' },
-  { id: 'saved', label: 'Saved', icon: 'bookmark-outline' },
-  { id: 'following', label: 'Following', icon: 'people-outline' },
-  { id: 'prayer', label: 'Prayer', icon: 'hand-left-outline' },
-  { id: 'tithes', label: 'Tithes and Offerings', icon: 'cash-outline' },
-  { id: 'friends', label: 'Friends', icon: 'person-add-outline' },
-  { id: 'about', label: 'About', icon: 'information-circle-outline' },
-  { id: 'language', label: 'Language', icon: 'language-outline' },
-  { id: 'help', label: 'Help', icon: 'help-circle-outline' },
-  { id: 'settings', label: 'Settings', icon: 'settings-outline' },
+  {
+    header: 'Account',
+    items: [
+      { id: 'profile', label: 'View Profile', icon: 'person-outline' },
+      { id: 'check-in', label: 'Check-In', icon: 'location-outline' },
+      { id: 'saved', label: 'Saved Items', icon: 'bookmark-outline' },
+      { id: 'friends', label: 'Friends', icon: 'people-outline' },
+    ]
+  },
+  {
+    header: 'Community & Faith',
+    items: [
+      { id: 'prayer', label: 'Prayer Requests', icon: 'heart-outline' },
+      { id: 'groups', label: 'Groups', icon: 'people-circle-outline' },
+      { id: 'tithes', label: 'Tithes & Giving', icon: 'wallet-outline' },
+      { id: 'events', label: 'Events', icon: 'calendar-outline' },
+    ]
+  },
+  {
+    header: 'App Settings',
+    items: [
+      { id: 'settings', label: 'Settings', icon: 'settings-outline' },
+      { id: 'help', label: 'Help & Support', icon: 'help-circle-outline' },
+      { id: 'about', label: 'About', icon: 'information-circle-outline' },
+      { id: 'logout', label: 'Log Out', icon: 'log-out-outline', color: '#DC2626' },
+    ]
+  }
 ];
 
 export default function MoreScreen({ navigation }) {
   const onPressItem = (id) => {
-    // Handle navigation based on item id
-    switch(id) {
+    switch (id) {
       case 'check-in':
         navigation.navigate('CheckIn');
         break;
@@ -32,57 +45,75 @@ export default function MoreScreen({ navigation }) {
       case 'settings':
         console.log('Settings clicked');
         break;
-      case 'help':
-        console.log('Help clicked');
+      case 'tithes':
+        navigation.navigate('Giving');
+        break;
+      case 'logout':
+        navigation.replace('SignIn');
         break;
       default:
         console.log('Pressed', id);
     }
   };
 
-  // Add profile as first item in the scrollable list
-  const flatListData = [
-    { type: 'profile', id: 'user-profile', name: 'Emmanuel Agbeko' },
-    ...SECTIONS.map(section => ({ ...section, type: 'item' })),
-  ];
-
-  const renderItem = ({ item }) => {
-    if (item.type === 'profile') {
-      return (
-        <View style={s.profileSection}>
-          <View style={s.avatarContainer}>
-            <Text style={s.avatarText}>E</Text>
-          </View>
-          <Text style={s.userName}>{item.name}</Text>
-        </View>
-      );
-    }
-
-    return (
-      <TouchableOpacity
-        style={s.item}
-        onPress={() => onPressItem(item.id)}
-        activeOpacity={0.6}
-      >
-        <Ionicons name={item.icon} size={22} color="#222" style={s.itemIcon} />
-        <Text style={s.label}>{item.label}</Text>
-        <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <SafeAreaView style={s.container}>
-      <FlatList
-        data={flatListData}
-        keyExtractor={item => item.id}
-        contentContainerStyle={s.listContainer}
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+
+      <ScrollView
+        contentContainerStyle={s.contentContainer}
         showsVerticalScrollIndicator={false}
-        renderItem={renderItem}
-        ItemSeparatorComponent={({ leadingItem }) =>
-          leadingItem?.type !== 'profile' ? <View style={s.separator} /> : null
-        }
-      />
+      >
+        {/* Profile Card */}
+        <View style={s.profileCard}>
+          <View style={s.avatarContainer}>
+            <Image
+              source={{ uri: 'https://i. Pravatar.cc/150?img=68' }} // Placeholder
+              style={s.avatar}
+            />
+            <View style={s.onlineBadge} />
+          </View>
+          <View style={s.profileInfo}>
+            <Text style={s.userName}>Emmanuel Agbeko</Text>
+            <Text style={s.userHandle}>@emmanuel_a</Text>
+          </View>
+          <TouchableOpacity style={s.editButton}>
+            <Ionicons name="create-outline" size={20} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Menu Sections */}
+        {SECTIONS.map((section, index) => (
+          <View key={index} style={s.section}>
+            <Text style={s.sectionHeader}>{section.header}</Text>
+            <View style={s.sectionContent}>
+              {section.items.map((item, idx) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    s.item,
+                    idx < section.items.length - 1 && s.itemBorder
+                  ]}
+                  onPress={() => onPressItem(item.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[s.iconContainer, { backgroundColor: item.color ? `${item.color}10` : '#F0F7FF' }]}>
+                    <Ionicons
+                      name={item.icon}
+                      size={20}
+                      color={item.color || colors.primary}
+                    />
+                  </View>
+                  <Text style={[s.label, item.color && { color: item.color }]}>{item.label}</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
+
+        <Text style={s.versionText}>Version 1.0.0</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -90,67 +121,113 @@ export default function MoreScreen({ navigation }) {
 const s = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
-
-  profileSection: {
+  contentContainer: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-  },
-
-  avatarContainer: {
-    width: 40,
-    height: 40,
+    backgroundColor: colors.card,
     borderRadius: 20,
-    backgroundColor: '#E5E7EB',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
+    padding: 16,
+    marginBottom: 24,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-
-  avatarText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
+  avatarContainer: {
+    position: 'relative',
+    marginRight: 16,
   },
-
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.borderLight,
+  },
+  onlineBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.success,
+    borderWidth: 2,
+    borderColor: colors.card,
+  },
+  profileInfo: {
+    flex: 1,
+  },
   userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 2,
   },
-
-  listContainer: {
-    paddingBottom: 100, // Space for tab bar
-    backgroundColor: '#fff',
+  userHandle: {
+    fontSize: 14,
+    color: colors.textSecondary,
   },
-
+  editButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#F0F7FF',
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    marginBottom: 12,
+    marginLeft: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sectionContent: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    padding: 16,
   },
-
-  itemIcon: {
-    marginRight: 18,
-    width: 22,
+  itemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
   },
-
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
   label: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
-    fontWeight: '400',
+    color: colors.text,
+    fontWeight: '500',
   },
-
-  separator: {
-    height: 1,
-    backgroundColor: '#F3F4F6',
-    marginLeft: 60,
-  },
+  versionText: {
+    textAlign: 'center',
+    color: colors.textMuted,
+    fontSize: 12,
+    marginBottom: 20,
+  }
 });

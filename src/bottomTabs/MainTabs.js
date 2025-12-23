@@ -1,15 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import {Platform} from "react-native"; 
-
-
+import { Platform } from "react-native";
+import colors from '../theme/colors';
 
 import HomeStack from './HomeStack';
 import BibleStack from './BibleStack';
 import MediaStack from './MediaStack';
 import MoreStack from './MoreStack';
-// import colors from '../theme/colors'; // Not needed for just black/gray
 
 const Tab = createBottomTabNavigator();
 
@@ -26,29 +24,49 @@ export default function MainTabs() {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={({ route }) => ({
+        headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: '#222',      // Black-ish for active
-        tabBarInactiveTintColor: '#9CA3AF', // Gray for inactive
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: '#FFF',
+          backgroundColor: colors.tabBarBackground || '#FFF',
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
-          height:  Platform.OS === "ios" ? 90 : 90,
+          borderTopColor: colors.border,
+          height: Platform.OS === "ios" ? 90 : 70, // Slightly reduced for Android if needed
+          paddingBottom: Platform.OS === "ios" ? 30 : 10,
+          paddingTop: 10,
+          elevation: 8,
+          shadowColor: colors.shadow,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
         },
         tabBarIcon: ({ focused, color, size }) => {
-          // Use MaterialCommunityIcons only for "More"
+          const iconName = iconMap[route.name];
+          const iconSize = 24;
+
           if (route.name === 'More') {
             return (
               <MaterialCommunityIcons
-                name={iconMap[route.name]}
-                size={24}
+                name={iconName}
+                size={iconSize}
                 color={color}
               />
             );
           }
-          // Otherwise use Ionicons
-          return <Ionicons name={iconMap[route.name]} size={24} color={color} />;
+
+          // Switch to filled icon if focused for better visual state
+          const finalIconName = focused ? iconName.replace('-outline', '') : iconName;
+          // Note: 'home' exists, 'book' exists, 'play' exists. 'menu' doesn't change.
+          // Adjust logic if needed based on available icons.
+          // Ionicons map: home-outline -> home, book-outline -> book, play-outline -> play
+
+          return <Ionicons name={focused ? finalIconName : iconName} size={iconSize} color={color} />;
         },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+        }
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
