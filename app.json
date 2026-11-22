@@ -1,30 +1,54 @@
 {
   "expo": {
-    "name": "churchify",
+    "name": "The Balance Church",
     "slug": "snack-ea872eba-4725-4907-bdff-121f49206bdd",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/church/brand/icon.png",
+    "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/church/brand/splash-blank.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "church.thebalance.app"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/church/brand/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "church.thebalance.app",
+      "splash": {
+        "backgroundColor": "#000000",
+        "image": "./assets/church/brand/splash-blank.png",
+        "resizeMode": "contain"
+      },
+      "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/church/brand/favicon.png",
+      "backgroundColor": "#000000",
+      "name": "The Balance Church"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/church/brand/splash-blank.png",
+          "imageWidth": 1,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#000000",
+            "image": "./assets/church/brand/splash-blank.png"
+          }
+        }
+      ]
+    ],
+    "backgroundColor": "#060607"
   }
 }

@@ -1,34 +1,64 @@
-// App.js
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useEffect, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import * as NativeSplash from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
+import {
+  Montserrat_300Light, Montserrat_600SemiBold, Montserrat_700Bold, Montserrat_800ExtraBold,
+} from '@expo-google-fonts/montserrat';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display';
 
-import MainTabs from "./src/bottomTabs/MainTabs";
-import Splash from "./src/screens/Splash/Splash";
-import Onboarding from "./src/screens/Onboarding/Onboarding";
-import SignIn from "./src/screens/SignIn/SignIn";
-import SignUp from "./src/screens/SignUp/SignUp";
-import WelcomeSplash from './src/screens/WelcomeSplash/WelcomeSplash';
+import { AuthProvider } from './src/context/AuthContext';
+import { StoreProvider } from './src/context/StoreContext';
+import RootNavigator from './src/navigation/RootNavigator';
+import SplashScreen from './src/screens/SplashScreen';
+import { colors } from './src/theme';
 
-const Stack = createNativeStackNavigator();
+// Keep the (all-black) native launch screen up until fonts are ready, then hand
+// straight over to the animated logo splash — no flash, no icon screen.
+NativeSplash.preventAutoHideAsync().catch(() => {});
+try { NativeSplash.setOptions({ duration: 0, fade: false }); } catch (e) {}
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Montserrat_300Light, Montserrat_600SemiBold, Montserrat_700Bold, Montserrat_800ExtraBold,
+    Inter_400Regular, Inter_500Medium, Inter_600SemiBold,
+    PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold,
+  });
+  const [splashDone, setSplashDone] = useState(false);
+
+  useEffect(() => {
+    if (fontsLoaded) NativeSplash.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.outer}>
       <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Splash" component={Splash} />
-            <Stack.Screen name="Onboarding" component={Onboarding} />
-            <Stack.Screen name="SignIn" component={SignIn} />
-            <Stack.Screen name="SignUp" component={SignUp} />
-            <Stack.Screen name="WelcomeSplash" component={WelcomeSplash} />
-            <Stack.Screen name="MainTabs" component={MainTabs} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <View style={styles.device}>
+          <StatusBar style="light" />
+          {fontsLoaded ? (
+            <AuthProvider>
+              <StoreProvider>
+                <RootNavigator />
+              </StoreProvider>
+            </AuthProvider>
+          ) : null}
+          {fontsLoaded && !splashDone ? <SplashScreen onDone={() => setSplashDone(true)} /> : null}
+          {!fontsLoaded ? <View style={[StyleSheet.absoluteFill, { backgroundColor: '#000' }]} /> : null}
+        </View>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  outer: { flex: 1, backgroundColor: Platform.OS === 'web' ? '#000' : colors.bg },
+  // On web, present the app in a phone-width column so it previews like a device.
+  device: Platform.OS === 'web'
+    ? { flex: 1, width: '100%', maxWidth: 430, alignSelf: 'center', backgroundColor: colors.bg, overflow: 'hidden',
+        borderLeftWidth: 1, borderRightWidth: 1, borderColor: '#151518' }
+    : { flex: 1, backgroundColor: colors.bg },
+});
