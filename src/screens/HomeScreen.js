@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +11,11 @@ import {
 } from '../components/ui';
 import { EventCard, MembersOnly, SermonHero, ServiceCard, YearThemeBanner } from '../components/blocks';
 import { BusinessHealthTiles } from './NewsScreens';
+import { CelebrationStrip, WishSheet } from './CelebrationsScreen';
+import { EpisodeCard, SPOTIFY_GREEN } from './PodcastScreens';
+import { NotificationPrompt } from './NotificationsScreen';
+import { useAudio } from '../context/AudioContext';
+import { parseRef } from '../services/bible';
 import { colors, fonts, radius, rs } from '../theme';
 
 export default function HomeScreen({ navigation }) {
@@ -21,16 +26,22 @@ export default function HomeScreen({ navigation }) {
   const latest = sermons[0];
   const upcoming = events.filter((e) => isMember || !e.membersOnly).slice(0, 5);
   const go = (route, params) => navigation.navigate(route, params);
+  const { episodes, play } = useAudio();
+  const [wish, setWish] = useState(null);
+  const listen = (ep) => { play(ep); go('Episode', { episode: ep }); };
+  const readWord = () => go('Bible', { ...(parseRef(word.ref) || {}), nonce: Date.now() });
 
   const actions = isMember
     ? [
         { icon: 'qr-code-outline', label: 'Check in', route: 'CheckIn' },
+        { icon: 'book-outline', label: 'Bible', route: 'Bible' },
         { icon: 'wallet-outline', label: 'Give', tab: 'Give' },
         { icon: 'flame-outline', label: 'Prayer', route: 'Prayer' },
         { icon: 'create-outline', label: 'Notes', route: 'Notes' },
       ]
     : [
         { icon: 'play-circle-outline', label: 'Watch', tab: 'Watch' },
+        { icon: 'book-outline', label: 'Bible', route: 'Bible' },
         { icon: 'wallet-outline', label: 'Give', tab: 'Give' },
         { icon: 'location-outline', label: 'Visit', route: 'About', params: { section: 'visit' } },
         { icon: 'book-outline', label: 'Books', route: 'Library' },
@@ -76,7 +87,7 @@ export default function HomeScreen({ navigation }) {
         )}
       </View>
 
-      <ServiceCard />
+      <ServiceCard onWatch={() => go('Live')} />
 
       {/* Quick actions */}
       <View style={styles.actions}>
@@ -97,12 +108,37 @@ export default function HomeScreen({ navigation }) {
           </Pressable>
         </View>
         <Scripture style={{ marginTop: 14 }}>“{word.text}”</Scripture>
-        <Text style={styles.ref}>— {word.ref}</Text>
+        <Pressable onPress={readWord} hitSlop={8} style={styles.readRow}>
+          <Text style={styles.ref}>— {word.ref}</Text>
+          <Text style={styles.readLink}>Read chapter</Text>
+          <Ionicons name="arrow-forward" size={12} color={colors.gold} />
+        </Pressable>
       </Card>
+
+      <NotificationPrompt />
+
+      {/* Birthdays in the church family (members only) */}
+      {isMember ? (
+        <>
+          <SectionHeader eyebrow="Church family" title="Celebrating this week" action="All" onAction={() => go('Celebrations')} />
+          <CelebrationStrip onOpen={() => go('Celebrations')} onWish={setWish} />
+          <WishSheet person={wish} onClose={() => setWish(null)} />
+        </>
+      ) : null}
 
       {/* Latest message */}
       <SectionHeader eyebrow="Latest message" title="From the pulpit" action="All" onAction={() => navigation.navigate('Watch')} />
       <SermonHero sermon={latest} onPress={() => go('Sermon', { sermon: latest })} />
+
+      {/* Sermon audio — the church podcast on Spotify, playable in the app */}
+      <SectionHeader eyebrow="Listen on the go" title="Sermon audio" action="All" onAction={() => go('Podcast')} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20 }} contentContainerStyle={{ paddingHorizontal: 20 }}>
+        {episodes.slice(0, 6).map((ep) => <EpisodeCard key={ep.id || ep.audioUrl} episode={ep} onPress={() => listen(ep)} />)}
+      </ScrollView>
+      <Pressable onPress={() => go('Podcast')} style={styles.spotifyLine}>
+        <View style={styles.spotifyDot} />
+        <Text style={styles.spotifyLineText}>Also on Spotify · Apostle Michael Dadzie Podcast</Text>
+      </Pressable>
 
       {/* Business & Health — the Sunday segments */}
       <SectionHeader eyebrow="Every Sunday" title="Business & Health" action="Open" onAction={() => go('News')} />
@@ -161,10 +197,15 @@ const styles = StyleSheet.create({
   fellowText: { fontFamily: fonts.label, fontSize: 12, color: colors.textSecondary },
   actions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 18 },
   action: { flex: 1, alignItems: 'center' },
-  actionIcon: { width: rs(60), height: rs(60), borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  actionLabel: { fontFamily: fonts.label, fontSize: 12, color: colors.textSecondary, marginTop: 8 },
+  actionIcon: { width: rs(54), height: rs(54), borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  actionLabel: { fontFamily: fonts.label, fontSize: 11, color: colors.textSecondary, marginTop: 8 },
   word2: { marginTop: 22, padding: 20, backgroundColor: colors.bgRaised, borderColor: colors.goldLine },
-  ref: { fontFamily: fonts.label, fontSize: 12, color: colors.gold, marginTop: 12, letterSpacing: 0.5 },
+  ref: { fontFamily: fonts.label, fontSize: 12, color: colors.gold, letterSpacing: 0.5, flex: 1 },
+  readRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12 },
+  readLink: { fontFamily: fonts.label, fontSize: 12, color: colors.gold },
+  spotifyLine: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  spotifyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: SPOTIFY_GREEN, marginRight: 8 },
+  spotifyLineText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.textMuted },
   footer: { alignItems: 'center', marginTop: 40, gap: 8 },
   footerText: { fontFamily: fonts.serifItalic, fontSize: 14, color: colors.textFaint },
 });

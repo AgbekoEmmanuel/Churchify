@@ -6,7 +6,7 @@ import { fetchSermons, seedSermons } from '../services/youtube';
 // Per-member local data: sermon notes, prayer requests, RSVPs, check-ins and a
 // giving log. Persisted on device; ready to be synced to the backend later.
 const StoreContext = createContext(null);
-const empty = { notes: [], prayers: [], rsvps: [], checkins: [], gifts: [] };
+const empty = { notes: [], prayers: [], rsvps: [], checkins: [], gifts: [], wishes: [] };
 
 export function StoreProvider({ children }) {
   const { member } = useAuth();
@@ -55,6 +55,7 @@ export function StoreProvider({ children }) {
     addPrayer: (p) => update((d) => ({ ...d, prayers: [{ ...p, id: `p${Date.now()}`, createdAt: new Date().toISOString(), status: 'Received' }, ...d.prayers] })),
     toggleRsvp: (eventId) => update((d) => ({ ...d, rsvps: d.rsvps.includes(eventId) ? d.rsvps.filter((x) => x !== eventId) : [...d.rsvps, eventId] })),
     addCheckin: (c) => update((d) => ({ ...d, checkins: [{ ...c, id: `c${Date.now()}`, at: new Date().toISOString() }, ...d.checkins] })),
+    sendWish: (w) => update((d) => ({ ...d, wishes: [{ ...w, id: `w${Date.now()}`, at: new Date().toISOString() }, ...(d.wishes || [])] })),
     logGift: (g) => update((d) => ({ ...d, gifts: [{ ...g, id: `g${Date.now()}`, at: new Date().toISOString() }, ...d.gifts] })),
   }), [data, sermons, sermonsLoading, refreshSermons, update]);
 

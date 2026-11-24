@@ -94,6 +94,7 @@ export const services = [
 
 export const socials = [
   { id: 'youtube', label: 'YouTube', icon: 'logo-youtube', url: 'https://www.youtube.com/@ApostleMichaelDadzie' },
+  { id: 'spotify', label: 'Spotify', icon: 'spotify', iconSet: 'fa', url: 'https://open.spotify.com/show/7yJjvVSA9mcWzgS58EqVCd' },
   { id: 'instagram', label: 'Instagram', icon: 'logo-instagram', url: 'https://instagram.com/_thebalancechurch' },
   { id: 'tiktok', label: 'TikTok', icon: 'logo-tiktok', url: 'https://tiktok.com/@thebalancechurch' },
   { id: 'facebook', label: 'Facebook', icon: 'logo-facebook', url: 'https://www.facebook.com/michael.dadzie.001' },
@@ -103,6 +104,15 @@ export const youtube = {
   channelId: 'UCjYedhCXDHfrixRivg3blOA',
   channelUrl: 'https://www.youtube.com/@ApostleMichaelDadzie',
   liveUrl: 'https://www.youtube.com/@ApostleMichaelDadzie/live',
+};
+
+// The church podcast (Apostle Michael Dadzie Podcast) on Spotify. Episodes are
+// read from the show's public RSS feed so members can listen inside the app.
+export const spotify = {
+  showId: '7yJjvVSA9mcWzgS58EqVCd',
+  showUrl: 'https://open.spotify.com/show/7yJjvVSA9mcWzgS58EqVCd',
+  rss: 'https://anchor.fm/s/1064419a0/podcast/rss',
+  title: 'Apostle Michael Dadzie Podcast',
 };
 
 export const giving = [

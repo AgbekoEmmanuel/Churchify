@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +8,7 @@ import { church } from '../data/church';
 import { prayerCategories } from '../data/content';
 import { formatDay, formatLongDate, formatShortDate, formatTime, getServiceStatus, timeAgo } from '../services/schedule';
 import {
-  Body, Button, Caption, Card, Chip, Display, EmptyState, Eyebrow, Field, H2, H3, Header, IconButton, Screen, SectionHeader, Small, tap,
+  Body, Button, Caption, Card, Chip, ConfirmDialog, Display, EmptyState, Eyebrow, Field, H2, H3, Header, IconButton, Screen, SectionHeader, Small, tap,
 } from '../components/ui';
 import { MemberCard } from './MeScreen';
 import { colors, fonts, radius } from '../theme';
@@ -132,14 +132,21 @@ export function NoteEditorScreen({ route, navigation }) {
     saveNote({ ...(note || {}), title: title.trim() || 'Untitled', body });
     navigation.goBack();
   };
-  const remove = () => {
-    const go = () => { deleteNote(note.id); navigation.goBack(); };
-    if (Platform.OS === 'web') return go();
-    Alert.alert('Delete note?', 'This can’t be undone.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: go }]);
-  };
+  const [asking, setAsking] = useState(false);
+  const remove = () => setAsking(true);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ConfirmDialog
+        visible={asking}
+        icon="trash-outline"
+        danger
+        title="Delete note?"
+        message="This can’t be undone."
+        confirmLabel="Delete"
+        onCancel={() => setAsking(false)}
+        onConfirm={() => { setAsking(false); deleteNote(note.id); navigation.goBack(); }}
+      />
       <Header
         onBack={() => navigation.goBack()}
         title={note ? 'Edit note' : 'New note'}

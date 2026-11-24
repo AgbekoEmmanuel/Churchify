@@ -1,8 +1,8 @@
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { BottomTabBar, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +22,13 @@ import MeScreen from '../screens/MeScreen';
 import { CheckInScreen, MemberCardScreen, NoteEditorScreen, NotesScreen, PrayerScreen } from '../screens/MemberScreens';
 import { AnnouncementsScreen, EventScreen, EventsScreen, LibraryScreen } from '../screens/ContentScreens';
 import { ArticleScreen, NewsScreen } from '../screens/NewsScreens';
+import { LiveScreen } from '../screens/SermonScreen';
+import { EpisodeScreen, MiniPlayer, PodcastScreen } from '../screens/PodcastScreens';
+import { BiblePickerScreen, BibleScreen } from '../screens/BibleScreens';
+import CelebrationsScreen from '../screens/CelebrationsScreen';
+import NotificationsScreen, { NotificationsProvider } from '../screens/NotificationsScreen';
+
+export const navigationRef = createNavigationContainerRef();
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,6 +47,12 @@ function Tabs() {
   const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
+      tabBar={(props) => (
+        <View>
+          <MiniPlayer onOpen={() => props.navigation.navigate('Episode')} />
+          <BottomTabBar {...props} />
+        </View>
+      )}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.gold,
@@ -98,11 +111,18 @@ export default function RootNavigator() {
       <Stack.Screen name="News" component={NewsScreen} />
       <Stack.Screen name="Article" component={ArticleScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="Live" component={LiveScreen} />
+      <Stack.Screen name="Podcast" component={PodcastScreen} />
+      <Stack.Screen name="Episode" component={EpisodeScreen} />
+      <Stack.Screen name="Bible" component={BibleScreen} />
+      <Stack.Screen name="BiblePicker" component={BiblePickerScreen} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="NotificationSettings" component={NotificationsScreen} />
     </>
   );
 
   return (
-    <NavigationContainer theme={navTheme}>
+    <NotificationsProvider navigationRef={navigationRef}>
+    <NavigationContainer ref={navigationRef} theme={navTheme}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -132,9 +152,11 @@ export default function RootNavigator() {
             <Stack.Screen name="Notes" component={NotesScreen} />
             <Stack.Screen name="NoteEditor" component={NoteEditorScreen} />
             <Stack.Screen name="Prayer" component={PrayerScreen} />
+            <Stack.Screen name="Celebrations" component={CelebrationsScreen} />
           </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    </NotificationsProvider>
   );
 }

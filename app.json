@@ -13,7 +13,12 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "church.thebalance.app"
+      "bundleIdentifier": "church.thebalance.app",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -46,6 +51,19 @@
             "backgroundColor": "#000000",
             "image": "./assets/church/brand/splash-blank.png"
           }
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#D6AE5E"
         }
       ]
     ],

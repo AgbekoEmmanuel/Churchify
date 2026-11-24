@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
-  ActivityIndicator, Animated, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, Animated, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -240,6 +240,31 @@ export function ListRow({ icon, title, subtitle, onPress, right, danger, last })
   );
 }
 
+// Confirmation pop-up in the app's own style (instead of the phone's grey alert).
+//   <ConfirmDialog visible title="Sign out?" message="…" confirmLabel="Sign out" danger
+//     icon="log-out-outline" onConfirm={…} onCancel={…} />
+export function ConfirmDialog({ visible, title, message, icon = 'help-circle-outline', confirmLabel = 'OK', cancelLabel = 'Cancel', danger, onConfirm, onCancel }) {
+  const tint = danger ? colors.danger : colors.gold;
+  return (
+    <Modal visible={!!visible} transparent animationType="fade" onRequestClose={onCancel} statusBarTranslucent>
+      <View style={styles.dlgWrap}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+        <View style={styles.dlg}>
+          <View style={[styles.dlgIcon, { backgroundColor: danger ? 'rgba(242,116,116,0.12)' : colors.goldSoft, borderColor: danger ? 'rgba(242,116,116,0.3)' : colors.goldLine }]}>
+            <Ionicons name={icon} size={24} color={tint} />
+          </View>
+          <Text style={styles.dlgTitle}>{title}</Text>
+          {message ? <Text style={styles.dlgMsg}>{message}</Text> : null}
+          <View style={styles.dlgBtns}>
+            <Button title={cancelLabel} variant="secondary" size="md" onPress={onCancel} style={{ flex: 1 }} />
+            <Button title={confirmLabel} variant={danger ? 'danger' : 'primary'} size="md" onPress={onConfirm} style={{ flex: 1 }} />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export function EmptyState({ icon = 'sparkles-outline', title, body, action, onAction }) {
   return (
     <View style={{ alignItems: 'center', paddingVertical: 48, paddingHorizontal: 24 }}>
@@ -289,4 +314,10 @@ const styles = StyleSheet.create({
   rowIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.goldSoft, alignItems: 'center', justifyContent: 'center' },
   rowTitle: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.text },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.goldSoft, alignItems: 'center', justifyContent: 'center' },
+  dlgWrap: { flex: 1, backgroundColor: 'rgba(0,0,0,0.72)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  dlg: { width: '100%', maxWidth: 360, borderRadius: 26, backgroundColor: colors.bgRaised, borderWidth: 1, borderColor: colors.borderStrong, padding: 22, alignItems: 'center' },
+  dlgIcon: { width: 54, height: 54, borderRadius: 27, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  dlgTitle: { fontFamily: fonts.heading, fontSize: 20, color: colors.text, marginTop: 14, textAlign: 'center' },
+  dlgMsg: { fontFamily: fonts.body, fontSize: 14, lineHeight: 21, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
+  dlgBtns: { flexDirection: 'row', gap: 10, marginTop: 22, alignSelf: 'stretch' },
 });

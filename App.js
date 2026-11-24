@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { LogBox, Platform, StyleSheet, View } from 'react-native';
 import * as NativeSplash from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,12 +13,18 @@ import { PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold } from '
 
 import { AuthProvider } from './src/context/AuthContext';
 import { StoreProvider } from './src/context/StoreContext';
+import { AudioProvider } from './src/context/AudioContext';
+import { CelebrationsProvider } from './src/context/CelebrationsContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import SplashScreen from './src/screens/SplashScreen';
 import { colors } from './src/theme';
 
 // Keep the (all-black) native launch screen up until fonts are ready, then hand
 // straight over to the animated logo splash — no flash, no icon screen.
+// Expo Go (Android) no longer supports *remote* push; our local reminders still
+// work, so hide that development-only notice.
+LogBox.ignoreLogs(['expo-notifications: Android Push notifications']);
+
 NativeSplash.preventAutoHideAsync().catch(() => {});
 try { NativeSplash.setOptions({ duration: 0, fade: false }); } catch (e) {}
 
@@ -42,7 +48,11 @@ export default function App() {
           {fontsLoaded ? (
             <AuthProvider>
               <StoreProvider>
-                <RootNavigator />
+                <CelebrationsProvider>
+                  <AudioProvider>
+                    <RootNavigator />
+                  </AudioProvider>
+                </CelebrationsProvider>
               </StoreProvider>
             </AuthProvider>
           ) : null}

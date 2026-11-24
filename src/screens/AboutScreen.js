@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dimensions, Image, Linking, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { brand, church, leaders, modelsOfEmphasis, photos, services, socials } from '../data/church';
 import { BackFab, Body, Button, Caption, Card, Eyebrow, H2, H3, IconButton, PressScale, Screen, SectionHeader, Small } from '../components/ui';
 import { colors, fonts, radius } from '../theme';
@@ -101,8 +101,8 @@ export default function AboutScreen({ navigation, route }) {
           <View style={styles.socials}>
             {socials.map((s) => (
               <PressScale key={s.id} onPress={() => Linking.openURL(s.url)} style={styles.social}>
-                <Ionicons name={s.icon} size={22} color={colors.text} />
-                <Caption style={{ marginTop: 6 }}>{s.label}</Caption>
+                {s.iconSet === 'fa' ? <FontAwesome name={s.icon} size={22} color={colors.text} /> : <Ionicons name={s.icon} size={22} color={colors.text} />}
+                <Caption numberOfLines={1} style={{ marginTop: 6, fontSize: 10 }}>{s.label}</Caption>
               </PressScale>
             ))}
           </View>
@@ -153,5 +153,5 @@ const styles = StyleSheet.create({
   svc: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   svcIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.goldSoft, alignItems: 'center', justifyContent: 'center' },
   socials: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 },
-  social: { width: '23%', alignItems: 'center', paddingVertical: 14, borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  social: { width: '18.6%', alignItems: 'center', paddingVertical: 14, borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
 });

@@ -7,6 +7,8 @@ import { books, photos, youtube } from '../data/church';
 import { getServiceStatus } from '../services/schedule';
 import { Body, Button, Caption, Chip, Display, Eyebrow, H2, PressScale, Screen, SectionHeader, Small } from '../components/ui';
 import { SermonCard, SermonHero, SermonRow } from '../components/blocks';
+import { useAudio } from '../context/AudioContext';
+import { EpisodeRow, SpotifyButton } from './PodcastScreens';
 import { colors, fonts, radius } from '../theme';
 
 const FILTERS = ['All', 'Sunday Service', 'Midweek', 'Prayer', 'Message', 'Special'];
@@ -18,6 +20,8 @@ export default function WatchScreen({ navigation }) {
   const list = useMemo(() => (filter === 'All' ? sermons : sermons.filter((s) => s.kind === filter)), [sermons, filter]);
   const series = useMemo(() => sermons.filter((s) => /trail\s?blazer/i.test(s.title)), [sermons]);
   const open = (s) => navigation.navigate('Sermon', { sermon: s });
+  const { episodes, play } = useAudio();
+  const listen = (ep) => { play(ep); navigation.navigate('Episode', { episode: ep }); };
 
   return (
     <Screen refreshControl={<RefreshControl refreshing={sermonsLoading} onRefresh={refreshSermons} tintColor={colors.gold} />}>
@@ -27,7 +31,7 @@ export default function WatchScreen({ navigation }) {
       </View>
 
       {/* Live banner */}
-      <PressScale onPress={() => Linking.openURL(youtube.liveUrl)} style={styles.live}>
+      <PressScale onPress={() => navigation.navigate('Live')} style={styles.live}>
         <Image source={photos.preaching} style={StyleSheet.absoluteFill} resizeMode="cover" />
         <LinearGradient colors={['rgba(6,6,7,0.92)', 'rgba(6,6,7,0.35)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
         <View style={{ padding: 18, flex: 1, justifyContent: 'center' }}>
@@ -38,10 +42,10 @@ export default function WatchScreen({ navigation }) {
           )}
           <H2 style={{ marginTop: 8, maxWidth: 220 }}>{live ? `${live.service.name} is live` : 'Join service online'}</H2>
           <Small style={{ marginTop: 4, maxWidth: 230 }}>
-            {live ? 'Tap to watch on YouTube' : `Streams every Sunday 10 AM & Wednesday 6:30 PM`}
+            {live ? 'Tap to watch right here in the app' : `Streams every Sunday 10 AM & Wednesday 6:30 PM`}
           </Small>
         </View>
-        <View style={styles.liveBtn}><Ionicons name={live ? 'play' : 'logo-youtube'} size={20} color="#141008" /></View>
+        <View style={styles.liveBtn}><Ionicons name="play" size={20} color="#141008" /></View>
       </PressScale>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20, marginTop: 22 }} contentContainerStyle={{ paddingHorizontal: 20 }}>
@@ -62,6 +66,10 @@ export default function WatchScreen({ navigation }) {
               </ScrollView>
             </>
           ) : null}
+
+          <SectionHeader eyebrow="Podcast · Spotify" title="Listen" action="All episodes" onAction={() => navigation.navigate('Podcast')} />
+          {episodes.slice(0, 3).map((ep, i) => <EpisodeRow key={ep.id || ep.audioUrl} episode={ep} onPress={() => listen(ep)} last={i === 2} />)}
+          <SpotifyButton style={{ marginTop: 12 }} />
 
           <SectionHeader eyebrow="Archive" title="Recent messages" />
           {sermons.slice(1).map((s) => <SermonRow key={s.id} sermon={s} onPress={() => open(s)} />)}

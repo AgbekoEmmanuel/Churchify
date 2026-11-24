@@ -1,5 +1,5 @@
-import React from 'react';
-import { Alert, Image, Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { brand, church, getFellowship } from '../data/church';
 import { formatShortDate } from '../services/schedule';
-import { Avatar, Caption, Card, Display, Eyebrow, H2, ListRow, PressScale, Screen, SectionHeader } from '../components/ui';
+import { Avatar, Caption, Card, ConfirmDialog, Display, Eyebrow, H2, ListRow, PressScale, Screen, SectionHeader } from '../components/ui';
 import { colors, fonts, radius } from '../theme';
 
 export function MemberCard({ member, compact }) {
@@ -47,16 +47,21 @@ export default function MeScreen({ navigation }) {
   const { notes, prayers, checkins, rsvps } = useStore();
   const go = (r, p) => navigation.navigate(r, p);
 
-  const confirmSignOut = () => {
-    if (Platform.OS === 'web') { signOut(); return; }
-    Alert.alert('Sign out?', 'You’ll need your Member ID and password to sign back in.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: signOut },
-    ]);
-  };
+  const [asking, setAsking] = useState(false);
+  const confirmSignOut = () => setAsking(true);
 
   return (
     <Screen>
+      <ConfirmDialog
+        visible={asking}
+        icon="log-out-outline"
+        danger
+        title="Sign out?"
+        message="You’ll need your Member ID and password to sign back in."
+        confirmLabel="Sign out"
+        onCancel={() => setAsking(false)}
+        onConfirm={() => { setAsking(false); signOut(); }}
+      />
       <View style={styles.head}>
         <Avatar name={`${member.firstName} ${member.lastName}`} size={58} />
         <View style={{ marginLeft: 14, flex: 1 }}>
@@ -87,15 +92,18 @@ export default function MeScreen({ navigation }) {
       <SectionHeader title="My church life" />
       <Card style={{ paddingVertical: 4 }}>
         <ListRow icon="qr-code-outline" title="Service check-in" subtitle="Mark your attendance" onPress={() => go('CheckIn')} />
+        <ListRow icon="book-outline" title="Bible" subtitle="KJV, NKJV, AMP, ESV, MSG and more" onPress={() => go('Bible')} />
         <ListRow icon="create-outline" title="Sermon notes" subtitle={`${notes.length} saved`} onPress={() => go('Notes')} />
         <ListRow icon="flame-outline" title="Prayer requests" subtitle="Share with the prayer team" onPress={() => go('Prayer')} />
         <ListRow icon="calendar-outline" title="Events" subtitle="Calendar & RSVPs" onPress={() => go('Events')} />
+        <ListRow icon="gift-outline" title="Birthdays" subtitle="Celebrate the church family" onPress={() => go('Celebrations')} />
         <ListRow icon="megaphone-outline" title="Announcements" onPress={() => go('Announcements')} last />
       </Card>
 
       <SectionHeader title="The church" />
       <Card style={{ paddingVertical: 4 }}>
         <ListRow icon="information-circle-outline" title="About The Balance Church" subtitle="Mission, vision & leadership" onPress={() => go('About')} />
+        <ListRow icon="headset-outline" title="Sermon audio" subtitle="Podcast · also on Spotify" onPress={() => go('Podcast')} />
         <ListRow icon="trending-up-outline" title="Business & Health" subtitle="Sunday business & health segments" onPress={() => go('News')} />
         <ListRow icon="library-outline" title="Library" subtitle="Books by Apostle Michael Dadzie" onPress={() => go('Library')} />
         <ListRow icon="logo-whatsapp" title="Message the church office" subtitle={church.phone} onPress={() => Linking.openURL(church.whatsapp)} last />
@@ -105,6 +113,7 @@ export default function MeScreen({ navigation }) {
       <Card style={{ paddingVertical: 4 }}>
         <ListRow icon="id-card-outline" title="Member ID" subtitle={member.memberId} right={null} />
         <ListRow icon="calendar-number-outline" title="Member since" subtitle={formatShortDate(member.memberSince) + ', ' + new Date(member.memberSince).getUTCFullYear()} right={null} />
+        <ListRow icon="notifications-outline" title="Notifications" subtitle="Reminders & alerts" onPress={() => go('NotificationSettings')} />
         <ListRow icon="key-outline" title="Change password" onPress={() => go('ForgotPassword')} />
         <ListRow icon="log-out-outline" title="Sign out" danger onPress={confirmSignOut} last />
       </Card>
