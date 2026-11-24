@@ -15,12 +15,23 @@ const Ctx = createContext(null);
 
 const mmdd = (m, d) => `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
-const fromDb = (rows) => rows.map((r) => ({
-  id: r.id,
-  name: r.name,
-  fellowshipName: r.fellowship || '',
-  date: mmdd(r.birth_month, r.birth_day),
-}));
+// The tracker's birthday table can hold the same person twice (older syncs used
+// a different id format), so keep one entry per name + date.
+const fromDb = (rows) => {
+  const seen = new Map();
+  rows.forEach((r) => {
+    const key = `${String(r.name || '').toLowerCase().replace(/[^a-z]/g, '')}|${r.birth_month}|${r.birth_day}`;
+    const prev = seen.get(key);
+    // Prefer the entry that has a fellowship, then the shorter (current-format) id.
+    if (!prev || (!prev.fellowship && r.fellowship) || (!!prev.fellowship === !!r.fellowship && String(r.id).length < String(prev.id).length)) seen.set(key, r);
+  });
+  return [...seen.values()].map((r) => ({
+    id: r.id,
+    name: r.name,
+    fellowshipName: r.fellowship || '',
+    date: mmdd(r.birth_month, r.birth_day),
+  }));
+};
 
 const samples = () => ({
   birthdays: sampleBirthdays.map((b) => ({ ...b, fellowshipName: (getFellowship(b.fellowshipId) || {}).name || '' })),
